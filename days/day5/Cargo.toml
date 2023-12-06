@@ -1,13 +1,11 @@
-[workspace.package]
-name = "aoc2023"
+[package]
+name = "day5"
 version = "0.1.0"
 edition = "2021"
 
-[workspace]
-members = ["days/*"]
-resolver = "2"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[workspace.dependencies]
-nom = "7.1.3"
+[dependencies]
+nom.workspace = true
+indicatif = { version = "0.17.7", features = ["rayon"] }
+rayon = "1.8.0"
