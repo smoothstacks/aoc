@@ -95,7 +95,7 @@ impl Map<'_> {
             .copied()
             .filter_map(|s| {
                 if s.ends_with("A") {
-                    Some(self.path_length(s, &directions, |o| o.ends_with("Z")))
+                    Some(self.path_length(s, directions, |o| o.ends_with('Z')))
                 } else {
                     None
                 }
