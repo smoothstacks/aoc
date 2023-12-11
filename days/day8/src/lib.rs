@@ -94,7 +94,7 @@ impl Map<'_> {
             .keys()
             .copied()
             .filter_map(|s| {
-                if s.ends_with("A") {
+                if s.ends_with('A') {
                     Some(self.path_length(s, directions, |o| o.ends_with('Z')))
                 } else {
                     None
@@ -104,18 +104,18 @@ impl Map<'_> {
             .product()
     }
 
-    fn follow_paths(&self, directions: &[Direction]) -> usize {
+    fn _follow_paths(&self, directions: &[Direction]) -> usize {
         let mut start_nodes: Vec<&str> = self
             .0
             .keys()
             .copied()
-            .filter(|s| s.ends_with("A"))
+            .filter(|s| s.ends_with('A'))
             .collect();
 
         let mut len = 0;
         let mut direction = 0;
         loop {
-            if start_nodes[2..3].iter().all(|s| s.ends_with("Z")) {
+            if start_nodes[2..3].iter().all(|s| s.ends_with('Z')) {
                 break;
             }
 
