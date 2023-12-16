@@ -4,9 +4,9 @@ mod parse {
 
     use nom::{
         bytes::complete::{tag, take},
-        character::complete::{anychar, newline},
+        character::complete::{anychar, line_ending},
         combinator::map_opt,
-        multi::{many1, separated_list1},
+        multi::{count, many1, separated_list1},
         sequence::{delimited, separated_pair},
         IResult,
     };
@@ -40,8 +40,8 @@ mod parse {
     pub fn parse(input: &str) -> IResult<&str, (Map<'_>, Vec<Direction>)> {
         let (input, (directions, entries)) = separated_pair(
             many1(parse_direction),
-            tag("\n\n"),
-            separated_list1(newline, parse_map_entry),
+            count(line_ending, 2),
+            separated_list1(line_ending, parse_map_entry),
         )(input)?;
 
         let map: HashMap<&str, [&str; 2]> = entries
