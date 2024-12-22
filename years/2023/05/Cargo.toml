@@ -1,12 +1,11 @@
 [package]
-name = "{{project-name}}"
+name = "aoc2023day05"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-aoc-util = { path = "../../../util" }
-
-itertools.workspace = true
-eyre.workspace = true
+nom.workspace = true
+indicatif = { version = "0.17.7", features = ["rayon"] }
+rayon = "1.8.0"

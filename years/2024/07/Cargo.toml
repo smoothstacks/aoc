@@ -1,5 +1,5 @@
 [package]
-name = "{{project-name}}"
+name = "aoc2024day07"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,5 +8,7 @@ edition = "2021"
 [dependencies]
 aoc-util = { path = "../../../util" }
 
+nom.workspace = true
+strum.workspace = true
 itertools.workspace = true
 eyre.workspace = true
