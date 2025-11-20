@@ -11,6 +11,7 @@ pub mod chargrid {
 
     #[derive(Debug, Clone, derive_more::From, derive_more::Deref)]
     pub struct CharGrid<'a>(Vec<&'a str>);
+
     impl<'a> CharGrid<'a> {
         pub fn new(input: &'a str) -> Self {
             Self(input.lines().collect())
@@ -30,7 +31,7 @@ pub mod chargrid {
             None
         }
 
-        pub fn find_all(&'a self, c: char) -> impl Iterator<Item = CharGridVec> + use<'a> {
+        pub fn find_all(&'a self, c: char) -> impl Iterator<Item = Position> + use<'a> {
             self.0.iter().enumerate().flat_map(move |(y, line)| {
                 line.chars().enumerate().filter_map(move |(x, c2)| {
                     if c == c2 {
@@ -49,7 +50,7 @@ pub mod chargrid {
                 && pos.0 < self.0[pos.1 as usize].len() as isize
         }
 
-        pub fn cursor(&self, pos: CharGridVec) -> CharGridCursor {
+        pub fn cursor(&self, pos: CharGridVec) -> CharGridCursor<'_> {
             CharGridCursor::new(self, pos)
         }
     }

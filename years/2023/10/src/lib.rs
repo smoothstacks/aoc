@@ -38,10 +38,6 @@ mod parse {
             Ok((input, tile))
         }
     }
-
-    pub fn parse(input: &str) -> IResult<&str, ()> {
-        Ok((input, ()))
-    }
 }
 
 struct Map {

@@ -54,7 +54,7 @@ impl Operator {
     fn all(count: usize, include_concat: bool) -> Vec<Vec<Self>> {
         let max = if include_concat { 3 } else { 2 };
         (0..count)
-            .map(|_| (0..max))
+            .map(|_| 0..max)
             .multi_cartesian_product()
             .map(|v| {
                 v.into_iter()
