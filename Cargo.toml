@@ -14,3 +14,4 @@ eyre = "*"
 itertools = "*"
 derive_more = { version = "*", features = ["full"] }
 strum = { version = "*", features = ["derive"] }
+glam = "0.30.9"
