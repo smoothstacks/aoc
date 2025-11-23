@@ -11,9 +11,9 @@ resolver = "2"
 [workspace.dependencies]
 aoc-util = { path = "util" }
 
-nom = "*"
 eyre = "*"
 itertools = "*"
+nom = "8.0.0"
 derive_more = { version = "*", features = ["full"] }
 strum = { version = "*", features = ["derive"] }
 glam = "0.30.9"
