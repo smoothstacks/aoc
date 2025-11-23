@@ -6,9 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-aoc-util = { path = "../../../util" }
+aoc-util.workspace = true
 
-nom.workspace = true
 strum.workspace = true
 itertools.workspace = true
 eyre.workspace = true

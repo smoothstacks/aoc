@@ -1,5 +1,5 @@
 [package]
-name = "aoc2023day10"
+name = "aoc2015day07"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,5 +7,7 @@ edition = "2021"
 
 [dependencies]
 aoc-util.workspace = true
-strum.workspace = true
-bitflags = "2.4.1"
+
+itertools.workspace = true
+eyre.workspace = true
+derive_more.workspace = true

@@ -1,10 +1,10 @@
-use nom::{
+use aoc_util::parse::nom::{
     branch::alt,
     bytes::complete::tag,
     character::complete::digit1,
     combinator::{map_res, value},
     sequence::separated_pair,
-    IResult,
+    IResult, Parser,
 };
 
 #[derive(Copy, Clone, Debug)]
@@ -21,14 +21,14 @@ struct Instruction {
 }
 
 fn parse_digit(i: &str) -> IResult<&str, usize> {
-    map_res(digit1, |s: &str| s.parse::<usize>())(i)
+    map_res(digit1, |s: &str| s.parse::<usize>()).parse(i)
 }
 fn parse_coordinate(i: &str) -> IResult<&str, glam::USizeVec2> {
-    let (i, (l, r)) = separated_pair(parse_digit, tag(","), parse_digit)(i)?;
+    let (i, (l, r)) = separated_pair(parse_digit, tag(","), parse_digit).parse(i)?;
     Ok((i, glam::USizeVec2::new(l, r)))
 }
 fn parse_pair(i: &str) -> IResult<&str, (glam::USizeVec2, glam::USizeVec2)> {
-    separated_pair(parse_coordinate, tag(" through "), parse_coordinate)(i)
+    separated_pair(parse_coordinate, tag(" through "), parse_coordinate).parse(i)
 }
 
 impl Instruction {
@@ -37,7 +37,8 @@ impl Instruction {
             value(Action::TurnOn, tag("turn on ")),
             value(Action::TurnOff, tag("turn off ")),
             value(Action::Toggle, tag("toggle ")),
-        ))(input)?;
+        ))
+        .parse(input)?;
         let (rest, (from, to)) = parse_pair(input)?;
 
         Ok((rest, Self { action, from, to }))

@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 
-use nom::{
+use aoc_util::parse::nom::{
     bytes::complete::tag,
-    character::complete::{char, digit0, newline},
-    combinator::{map, map_res},
+    character::complete::{char, newline},
+    combinator::map,
     multi::separated_list0,
     sequence::separated_pair,
-    IResult,
+    IResult, Parser,
 };
 
 // map of page numbers -> numbers that should NOT predcede them
@@ -29,11 +29,9 @@ impl FromIterator<(u32, u32)> for Rules {
 
 type Updates = Vec<Vec<u32>>;
 
-fn parse_num(input: &str) -> IResult<&str, u32> {
-    map_res(digit0, |s: &str| s.parse::<u32>())(input)
-}
-
 fn parse(input: &str) -> IResult<&str, (Rules, Updates)> {
+    use aoc_util::parse::parse_num;
+
     separated_pair(
         map(
             separated_list0(newline, separated_pair(parse_num, tag("|"), parse_num)),
@@ -41,7 +39,8 @@ fn parse(input: &str) -> IResult<&str, (Rules, Updates)> {
         ),
         tag("\n\n"),
         separated_list0(newline, separated_list0(char(','), parse_num)),
-    )(input)
+    )
+    .parse(input)
 }
 
 pub fn part1(input: &'static str) -> eyre::Result<u32> {

@@ -1,24 +1,26 @@
 use std::fmt::Debug;
 
 mod parse {
-    use nom::{
-        character::complete::line_ending,
+    use aoc_util::parse::nom::{
+        character::complete::{anychar, line_ending},
+        error,
         multi::{many1, separated_list1},
-        IResult,
+        Err, IResult, Parser,
     };
 
     use super::*;
 
     impl Map {
         pub fn parse(input: &str) -> IResult<&str, Self> {
-            let (input, positions) = separated_list1(line_ending, many1(Tile::parse))(input)?;
+            let (input, positions) =
+                separated_list1(line_ending, many1(Tile::parse)).parse(input)?;
             Ok((input, Self { positions }))
         }
     }
 
     impl Tile {
         pub fn parse(input: &str) -> IResult<&str, Self> {
-            let (input, c) = nom::character::complete::anychar(input)?;
+            let (input, c) = anychar(input)?;
             let tile = match c {
                 'S' => Tile::Start,
                 '.' => Tile::Ground,
@@ -28,12 +30,7 @@ mod parse {
                 'J' => Tile::Pipe(Pipe::BendNorthWest),
                 '7' => Tile::Pipe(Pipe::BendSouthWest),
                 'F' => Tile::Pipe(Pipe::BendSouthEast),
-                _ => {
-                    return Err(nom::Err::Error(nom::error::make_error(
-                        input,
-                        nom::error::ErrorKind::Char,
-                    )))
-                }
+                _ => return Err(Err::Error(error::make_error(input, error::ErrorKind::Char))),
             };
             Ok((input, tile))
         }

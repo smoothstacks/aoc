@@ -1,25 +1,23 @@
 mod parse {
-    use nom::{
-        bytes::complete::tag,
-        character::complete::{digit1, newline, space0, space1},
-        combinator::map_res,
-        multi::separated_list1,
-        sequence::{preceded, tuple},
-        IResult,
+    use aoc_util::parse::{
+        nom::{
+            bytes::complete::tag,
+            character::complete::{digit1, newline, space1},
+            multi::separated_list1,
+            sequence::preceded,
+            IResult, Parser,
+        },
+        parse_num,
     };
 
     use super::*;
 
-    fn parse_u64(input: &str) -> IResult<&str, u64> {
-        let (input, _) = space0(input)?;
-        map_res(digit1, str::parse::<u64>)(input)
-    }
-
     pub fn parse(input: &str) -> IResult<&str, Vec<Race>> {
-        let (input, times) = preceded(tag("Time:"), separated_list1(space1, parse_u64))(input)?;
+        let (input, times) =
+            preceded(tag("Time:"), separated_list1(space1, parse_num)).parse(input)?;
         let (input, _) = newline(input)?;
         let (input, distances) =
-            preceded(tag("Distance:"), separated_list1(space1, parse_u64))(input)?;
+            preceded(tag("Distance:"), separated_list1(space1, parse_num)).parse(input)?;
 
         let races = times
             .into_iter()
@@ -31,15 +29,11 @@ mod parse {
     }
 
     pub fn parse_single(input: &str) -> IResult<&str, Race> {
-        let (input, times) = preceded(
-            tuple((tag("Time:"), space1)),
-            separated_list1(space1, digit1),
-        )(input)?;
+        let (input, times) =
+            preceded((tag("Time:"), space1), separated_list1(space1, digit1)).parse(input)?;
         let (input, _) = newline(input)?;
-        let (input, distances) = preceded(
-            tuple((tag("Distance:"), space1)),
-            separated_list1(space1, digit1),
-        )(input)?;
+        let (input, distances) =
+            preceded((tag("Distance:"), space1), separated_list1(space1, digit1)).parse(input)?;
 
         let time = times.join("").parse::<u64>().expect("times should join");
         let distance = distances

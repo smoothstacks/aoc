@@ -103,13 +103,14 @@ impl Game {
 }
 
 mod parse {
-    use nom::{
+    use aoc_util::parse::nom::{
         bytes::complete::tag,
         character::complete::{digit1, newline, space0, space1},
         combinator::map_res,
+        error::{Error, ErrorKind},
         multi::separated_list0,
         sequence::{preceded, separated_pair},
-        IResult,
+        Err, IResult, Parser,
     };
 
     use super::*;
@@ -123,23 +124,20 @@ mod parse {
             .find_map(|(i, color)| input.strip_prefix(color).map(|s| (i, s)))
         {
             Some((i, input)) => Ok((input, Color::from(i as u8))),
-            None => Err(nom::Err::Error(nom::error::Error::new(
-                input,
-                nom::error::ErrorKind::Fail,
-            ))),
+            None => Err(Err::Error(Error::new(input, ErrorKind::Fail))),
         }
     }
 
     fn parse_cube(input: &str) -> IResult<&str, Cube> {
         let (input, _) = space0(input)?;
-        let (input, amount) = map_res(digit1, str::parse::<usize>)(input)?;
+        let (input, amount) = map_res(digit1, str::parse::<usize>).parse(input)?;
         let (input, _) = space1(input)?;
         let (input, color) = parse_color(input)?;
         Ok((input, Cube { color, amount }))
     }
 
     fn parse_revealed(input: &str) -> IResult<&str, Revealed> {
-        let (input, cubes) = separated_list0(tag(","), parse_cube)(input)?;
+        let (input, cubes) = separated_list0(tag(","), parse_cube).parse(input)?;
         Ok((
             input,
             Revealed {
@@ -149,23 +147,23 @@ mod parse {
     }
 
     fn parse_revealed_list(input: &str) -> IResult<&str, Vec<Revealed>> {
-        let (input, revealed) = separated_list0(tag(";"), parse_revealed)(input)?;
+        let (input, revealed) = separated_list0(tag(";"), parse_revealed).parse(input)?;
         Ok((input, revealed))
     }
 
     fn parse_game_id(input: &str) -> IResult<&str, u32> {
-        map_res(preceded(tag("Game "), digit1), str::parse)(input)
+        map_res(preceded(tag("Game "), digit1), str::parse).parse(input)
     }
 
     fn parse_game(input: &str) -> IResult<&str, Game> {
         let (input, (id, revealed)) =
-            separated_pair(parse_game_id, tag(":"), parse_revealed_list)(input)?;
+            separated_pair(parse_game_id, tag(":"), parse_revealed_list).parse(input)?;
 
         Ok((input, Game { id, revealed }))
     }
 
     pub fn parse(input: &str) -> IResult<&str, Vec<Game>> {
-        let (input, games) = separated_list0(newline, parse_game)(input)?;
+        let (input, games) = separated_list0(newline, parse_game).parse(input)?;
         Ok((input, games))
     }
 

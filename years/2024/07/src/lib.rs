@@ -1,12 +1,12 @@
-use itertools::Itertools;
-use nom::{
+use aoc_util::parse::nom::{
     bytes::complete::tag,
     character::complete::{newline, space1},
     combinator::map,
     multi::separated_list1,
     sequence::separated_pair,
-    IResult,
+    IResult, Parser,
 };
+use itertools::Itertools;
 
 pub fn part1(input: &'static str) -> eyre::Result<u64> {
     let (_, equations) = parse(input)?;
@@ -34,7 +34,8 @@ fn parse(input: &str) -> IResult<&str, Vec<Equation>> {
             separated_pair(parse_num, tag(": "), separated_list1(space1, parse_num)),
             |(result, operands)| Equation { result, operands },
         ),
-    )(input)
+    )
+    .parse(input)
 }
 
 #[derive(Debug, PartialEq, Eq)]

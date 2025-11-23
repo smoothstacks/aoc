@@ -1,33 +1,29 @@
 use std::ops::Range;
 
 mod parse {
-    use std::str::FromStr;
-
-    use nom::{
-        bytes::complete::tag,
-        character::complete::{alpha1, digit1, newline, space1},
-        combinator::map_res,
-        multi::separated_list1,
-        sequence::{preceded, separated_pair, tuple},
-        IResult,
+    use aoc_util::parse::{
+        nom::{
+            bytes::complete::tag,
+            character::complete::{alpha1, newline, space1},
+            multi::separated_list1,
+            sequence::{preceded, separated_pair},
+            IResult, Parser,
+        },
+        parse_num,
     };
 
     use super::*;
 
-    fn parse_num<T: FromStr>(input: &str) -> IResult<&str, T> {
-        map_res(digit1, str::parse::<T>)(input)
-    }
-
     fn parse_seeds(input: &str) -> IResult<&str, Vec<isize>> {
-        preceded(tag("seeds: "), separated_list1(space1, parse_num::<isize>))(input)
+        preceded(tag("seeds: "), separated_list1(space1, parse_num)).parse(input)
     }
 
     fn parse_mapping(input: &str) -> IResult<&str, Mapping> {
-        let (input, destination_start) = parse_num::<isize>(input)?;
+        let (input, destination_start): (&str, isize) = parse_num(input)?;
         let (input, _) = space1(input)?;
-        let (input, source_start) = parse_num::<isize>(input)?;
+        let (input, source_start) = parse_num(input)?;
         let (input, _) = space1(input)?;
-        let (input, length) = parse_num::<isize>(input)?;
+        let (input, length): (&str, isize) = parse_num(input)?;
 
         let source = source_start..source_start + length;
         let offset = destination_start - source_start;
@@ -36,16 +32,16 @@ mod parse {
     }
 
     fn parse_category_map(input: &str) -> IResult<&str, Vec<Mapping>> {
-        let (input, (_, _)) = separated_pair(alpha1, tag("-to-"), alpha1)(input)?;
-        let (input, _) = tuple((tag(" map:"), newline))(input)?;
-        let (input, mappings) = separated_list1(newline, parse_mapping)(input)?;
+        let (input, (_, _)) = separated_pair(alpha1, tag("-to-"), alpha1).parse(input)?;
+        let (input, _) = (tag(" map:"), newline).parse(input)?;
+        let (input, mappings) = separated_list1(newline, parse_mapping).parse(input)?;
         Ok((input, mappings))
     }
 
     pub fn parse(input: &str) -> IResult<&str, Almanac> {
         let (input, seeds) = parse_seeds(input)?;
         let (input, _) = tag("\n\n")(input)?;
-        let (input, maps) = separated_list1(tag("\n\n"), parse_category_map)(input)?;
+        let (input, maps) = separated_list1(tag("\n\n"), parse_category_map).parse(input)?;
 
         Ok((input, Almanac { seeds, maps }))
     }

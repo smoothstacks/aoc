@@ -1,44 +1,41 @@
 use std::collections::HashSet;
 
 mod parse {
-    use nom::{
-        bytes::complete::tag,
-        character::complete::{digit1, line_ending, space0, space1},
-        combinator::map_res,
-        multi::separated_list1,
-        sequence::{preceded, separated_pair},
-        IResult,
+    use aoc_util::parse::{
+        nom::{
+            bytes::complete::tag,
+            character::complete::{line_ending, space0, space1},
+            multi::separated_list1,
+            sequence::{preceded, separated_pair},
+            IResult, Parser,
+        },
+        parse_num,
     };
 
     use super::*;
 
     pub fn parse(input: &str) -> IResult<&str, Vec<Card>> {
-        fn parse_u32(input: &str) -> IResult<&str, u32> {
-            let (input, _) = space0(input)?;
-            map_res(digit1, str::parse::<u32>)(input)
-        }
-
         fn parse_numbers_list(input: &str) -> IResult<&str, Vec<u32>> {
-            separated_list1(space1, parse_u32)(input)
+            separated_list1(space1, parse_num).parse(input)
         }
 
         fn parse_card(input: &str) -> IResult<&str, Card> {
-            let (input, id) = preceded(tag("Card"), parse_u32)(input)?;
-            let (input, _) = preceded(tag(": "), space0)(input)?;
+            let (input, id): (&str, usize) = preceded(tag("Card"), parse_num).parse(input)?;
+            let (input, _) = preceded(tag(": "), space0).parse(input)?;
             let (input, (numbers, winning_numbers)) =
-                separated_pair(parse_numbers_list, tag(" | "), parse_numbers_list)(input)?;
+                separated_pair(parse_numbers_list, tag(" | "), parse_numbers_list).parse(input)?;
 
             Ok((
                 input,
                 Card {
-                    id: (id - 1) as usize,
+                    id: id - 1,
                     numbers: HashSet::from_iter(numbers.into_iter()),
                     winning_numbers: HashSet::from_iter(winning_numbers.into_iter()),
                 },
             ))
         }
 
-        separated_list1(line_ending, parse_card)(&input)
+        separated_list1(line_ending, parse_card).parse(input)
     }
 }
 

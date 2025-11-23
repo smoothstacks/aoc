@@ -1,7 +1,7 @@
-pub fn part1(input: &str) -> eyre::Result<u32> {
+pub fn part1(_: &str) -> eyre::Result<u32> {
     Ok(0)
 }
-pub fn part2(input: &str) -> eyre::Result<u32> {
+pub fn part2(_: &str) -> eyre::Result<u32> {
     Ok(0)
 }
 

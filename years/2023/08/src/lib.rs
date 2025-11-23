@@ -2,13 +2,13 @@ use std::collections::HashMap;
 
 mod parse {
 
-    use nom::{
+    use aoc_util::parse::nom::{
         bytes::complete::{tag, take},
         character::complete::{anychar, line_ending},
         combinator::map_opt,
         multi::{count, many1, separated_list1},
         sequence::{delimited, separated_pair},
-        IResult,
+        IResult, Parser,
     };
 
     use super::*;
@@ -18,7 +18,8 @@ mod parse {
             'L' => Some(Direction::Left),
             'R' => Some(Direction::Right),
             _ => None,
-        })(input)
+        })
+        .parse(input)
     }
 
     fn parse_node(input: &str) -> IResult<&str, &str> {
@@ -30,11 +31,12 @@ mod parse {
             tag("("),
             separated_pair(parse_node, tag(", "), parse_node),
             tag(")"),
-        )(input)
+        )
+        .parse(input)
     }
 
     fn parse_map_entry(input: &str) -> IResult<&str, (&str, (&str, &str))> {
-        separated_pair(parse_node, tag(" = "), parse_node_pair)(input)
+        separated_pair(parse_node, tag(" = "), parse_node_pair).parse(input)
     }
 
     pub fn parse(input: &str) -> IResult<&str, (Map<'_>, Vec<Direction>)> {
@@ -42,7 +44,8 @@ mod parse {
             many1(parse_direction),
             count(line_ending, 2),
             separated_list1(line_ending, parse_map_entry),
-        )(input)?;
+        )
+        .parse(input)?;
 
         let map: HashMap<&str, [&str; 2]> = entries
             .into_iter()

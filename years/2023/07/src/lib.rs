@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
 mod parse {
-    use nom::{
+    use aoc_util::parse::nom::{
         character::complete::{anychar, digit1, newline, space1},
         combinator::{map_opt, map_res},
         multi::{count, separated_list1},
         sequence::separated_pair,
-        IResult,
+        IResult, Parser,
     };
 
     use super::*;
@@ -18,13 +18,14 @@ mod parse {
                     .iter()
                     .position(|other| *other == label)
                     .map(|rank| Card { label, rank })
-            })(input)
+            })
+            .parse(input)
         }
     }
 
     impl Hand {
         pub fn parse(input: &str) -> IResult<&str, Hand> {
-            let (input, cards_vec) = count(Card::parse, 5)(input)?;
+            let (input, cards_vec) = count(Card::parse, 5).parse(input)?;
             let mut cards = [Card::default(); 5];
             cards.copy_from_slice(&cards_vec);
             Ok((input, Hand::new(cards)))
@@ -35,7 +36,8 @@ mod parse {
         separated_list1(
             newline,
             separated_pair(Hand::parse, space1, map_res(digit1, str::parse::<u32>)),
-        )(input)
+        )
+        .parse(input)
     }
 }
 

@@ -1,11 +1,11 @@
 use std::ops::RangeInclusive;
 
 mod parse {
-    use nom::{
+    use aoc_util::parse::nom::{
         bytes::complete::tag,
         character::complete::{anychar, digit1, newline},
         combinator::{consumed, map_res, opt},
-        IResult,
+        IResult, Parser,
     };
 
     use super::*;
@@ -22,7 +22,7 @@ mod parse {
             }
 
             if let (next, Some((consumed, value))) =
-                opt(consumed(map_res(digit1, str::parse::<u32>)))(input)?
+                opt(consumed(map_res(digit1, str::parse::<u32>))).parse(input)?
             {
                 parts.push(PartNumber {
                     value,
@@ -34,20 +34,20 @@ mod parse {
                 continue;
             }
 
-            if let (next, Some(_)) = opt(tag("."))(input)? {
+            if let (next, Some(_)) = opt(tag(".")).parse(input)? {
                 col += 1;
                 input = next;
                 continue;
             }
 
-            if let (next, Some(_)) = opt(newline)(input)? {
+            if let (next, Some(_)) = opt(newline).parse(input)? {
                 row += 1;
                 col = 0;
                 input = next;
                 continue;
             }
 
-            if let (next, Some(value)) = opt(anychar)(input)? {
+            if let (next, Some(value)) = opt(anychar).parse(input)? {
                 symbols.push(Symbol {
                     value,
                     row,

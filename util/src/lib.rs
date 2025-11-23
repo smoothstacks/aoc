@@ -1,8 +1,16 @@
 pub mod parse {
-    use nom::{character::complete::digit0, combinator::map_res, IResult};
+    use std::str::FromStr;
 
-    pub fn parse_num(input: &str) -> IResult<&str, u64> {
-        map_res(digit0, |s: &str| s.parse::<u64>())(input)
+    pub use nom;
+    use nom::{character::complete::digit0, combinator::map_res, AsChar, IResult, Input, Parser};
+
+    pub fn parse_num<I, T>(input: I) -> IResult<I, T>
+    where
+        I: Input + AsRef<str>,
+        <I as Input>::Item: AsChar,
+        T: FromStr,
+    {
+        map_res(digit0, |s: I| s.as_ref().parse::<T>()).parse(input)
     }
 }
 
