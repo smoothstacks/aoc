@@ -1,5 +1,3 @@
-use std::collections::{HashMap, HashSet};
-
 use aoc_util::parse::{
     nom::{
         branch::alt,
@@ -15,10 +13,7 @@ use aoc_util::parse::{
     parse_num,
 };
 use itertools::Itertools;
-use petgraph::{
-    prelude::{DiGraphMap, UnGraphMap},
-    Direction,
-};
+use petgraph::prelude::DiGraphMap;
 
 fn parse(input: &str) -> eyre::Result<DiGraphMap<&str, i16>> {
     let parse_potential = (
