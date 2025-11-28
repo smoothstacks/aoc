@@ -1,7 +1,7 @@
 run year day:
     #!/bin/bash
     day=`printf %02d {{day}}`
-    cargo r -p aoc{{year}}day${day}
+    cargo r -p aoc{{year}}day${day} --release
 test year day:
     #!/bin/bash
     day=`printf %02d {{day}}`
