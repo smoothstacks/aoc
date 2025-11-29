@@ -175,7 +175,7 @@ NOT y -> i
     }
     #[test]
     fn part2_works() -> eyre::Result<()> {
-        assert_eq!(super::part2(INPUT)?, 0);
+        assert_eq!(super::part2(INPUT)?, 72);
         Ok(())
     }
 }

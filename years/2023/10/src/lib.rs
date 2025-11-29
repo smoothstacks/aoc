@@ -59,6 +59,7 @@ impl Debug for Map {
     }
 }
 
+#[allow(dead_code)]
 impl Map {
     fn start(&self) -> (usize, usize) {
         self.positions
@@ -86,12 +87,14 @@ impl Map {
     }
 }
 
+#[allow(dead_code)]
 struct LoopCursor<'a> {
     map: &'a Map,
     position: (usize, usize),
     facing: Direction,
 }
 
+#[allow(dead_code)]
 impl LoopCursor<'_> {
     pub fn next(&mut self) {
         match self.map.tile_at(self.position) {
@@ -142,6 +145,7 @@ enum Pipe {
     BendSouthEast = b'F',
 }
 
+#[allow(dead_code)]
 impl Pipe {
     fn connects(&self, direction: Direction) -> bool {
         match self {
@@ -170,7 +174,7 @@ enum Direction {
 }
 
 pub fn part1(input: &str) -> u32 {
-    let (_, map) = Map::parse(input).expect("should parse the map");
+    let (_, _) = Map::parse(input).expect("should parse the map");
     0
 }
 pub fn part2(_input: &str) -> u32 {

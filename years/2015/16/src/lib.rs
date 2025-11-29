@@ -86,6 +86,7 @@ mod tests {
     #[test]
     fn part1_works() -> eyre::Result<()> {
         assert_eq!(super::part1(INPUT)?, 0);
+
         Ok(())
     }
     #[test]

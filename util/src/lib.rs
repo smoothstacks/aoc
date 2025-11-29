@@ -1,3 +1,5 @@
+pub use glam;
+
 pub mod parse {
     use std::str::FromStr;
 
