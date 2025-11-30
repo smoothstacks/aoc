@@ -52,61 +52,104 @@ fn parse(input: &str) -> Grid {
     Grid { entries }
 }
 
+fn run(current: &Grid, next: &mut Grid, corners: bool) {
+    let (width, height) = current.dimensions();
+
+    for y in 0..height {
+        for x in 0..width {
+            let pos = glam::u16vec2(x, y);
+            let neighbours = iproduct!(-1..=1, -1..=1)
+                .map(|(x, y)| glam::i16vec2(x, y))
+                .filter(|x| *x != glam::I16Vec2::ZERO)
+                .filter_map(|delta| {
+                    let neighbour = pos.checked_add_signed(delta)?;
+                    current.get(neighbour).map(|_| neighbour)
+                });
+
+            let is_corner = neighbours.clone().count() == 3;
+            let lit_neighbours = neighbours
+                .clone()
+                .filter_map(|p| current.get(p).filter(|b| *b))
+                .count();
+
+            let state = current.get(pos).expect("out of range");
+
+            let lit = if corners && is_corner {
+                true
+            } else {
+                match state {
+                    true => lit_neighbours == 2 || lit_neighbours == 3,
+                    false => lit_neighbours == 3,
+                }
+            };
+
+            *next.get_mut(pos).expect("out of range") = lit;
+        }
+    }
+}
+
 pub fn part1(input: &str) -> eyre::Result<usize> {
     let mut grid = parse(input);
 
-    let (width, height) = grid.dimensions();
-
     let mut current = &mut grid.clone();
     let mut next = &mut grid;
-    for _ in 0..100 {
-        for y in 0..height {
-            for x in 0..width {
-                let pos = glam::u16vec2(x, y);
-                let around = iproduct!(-1..=1, -1..=1)
-                    .map(|(x, y)| glam::i16vec2(x, y))
-                    .filter(|x| *x != glam::I16Vec2::ZERO)
-                    .collect_vec();
-                let count = around
-                    .into_iter()
-                    .filter_map(|delta| current.get(pos.checked_add_signed(delta)?).filter(|b| *b))
-                    .count();
 
-                let state = current.get(pos).expect("out of range");
+    #[cfg(not(test))]
+    let range = 0..100;
+    #[cfg(test)]
+    let range = 0..4;
 
-                *next.get_mut(pos).expect("out of range") = match state {
-                    true => count == 2 || count == 3,
-                    false => count == 3,
-                }
-            }
-        }
-
+    for _ in range {
+        run(current, next, false);
         std::mem::swap(&mut current, &mut next);
     }
 
     Ok(current.count())
 }
-pub fn part2(_: &str) -> eyre::Result<u32> {
-    Ok(0)
+pub fn part2(input: &str) -> eyre::Result<usize> {
+    let mut grid = parse(input);
+
+    let mut current = &mut grid.clone();
+    let mut next = &mut grid;
+
+    #[cfg(not(test))]
+    let range = 0..100;
+    #[cfg(test)]
+    let range = 0..5;
+
+    for _ in range {
+        run(current, next, true);
+        std::mem::swap(&mut current, &mut next);
+    }
+
+    Ok(current.count())
 }
 
 #[cfg(test)]
 mod tests {
-    const INPUT: &str = ".#.#.#
+
+    #[test]
+    fn part1_works() -> eyre::Result<()> {
+        const INPUT: &str = ".#.#.#
 ...##.
 #....#
 ..#...
 #.#..#
 ####..";
 
-    #[test]
-    fn part1_works() -> eyre::Result<()> {
         assert_eq!(super::part1(INPUT)?, 4);
         Ok(())
     }
     #[test]
     fn part2_works() -> eyre::Result<()> {
-        assert_eq!(super::part2(INPUT)?, 0);
+        const INPUT: &str = "##.#.#
+...##.
+#....#
+..#...
+#.#..#
+####.#";
+
+        assert_eq!(super::part2(INPUT)?, 17);
         Ok(())
     }
 }
