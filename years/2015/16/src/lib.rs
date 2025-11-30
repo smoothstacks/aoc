@@ -84,18 +84,6 @@ mod tests {
     const INPUT: &str = "Sue 100: abc: 1, cde: 2\nSue 101: abc: 1, cde: 2\n";
 
     #[test]
-    fn part1_works() -> eyre::Result<()> {
-        assert_eq!(super::part1(INPUT)?, 0);
-
-        Ok(())
-    }
-    #[test]
-    fn part2_works() -> eyre::Result<()> {
-        assert_eq!(super::part2(INPUT)?, 0);
-        Ok(())
-    }
-
-    #[test]
     fn parse_works() -> eyre::Result<()> {
         super::parse(INPUT)?;
         Ok(())

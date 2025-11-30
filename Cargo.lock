@@ -193,6 +193,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc2015day19"
+version = "0.1.0"
+dependencies = [
+ "aoc-util",
+ "eyre",
+ "itertools",
+]
+
+[[package]]
 name = "aoc2023day01"
 version = "0.1.0"
 dependencies = [

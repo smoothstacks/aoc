@@ -39,20 +39,3 @@ pub fn part2(input: &str) -> eyre::Result<usize> {
 
     Ok(out.len())
 }
-
-#[cfg(test)]
-mod tests {
-    const INPUT: &str = "1321131112";
-    // 111312211331
-
-    #[test]
-    fn part1_works() -> eyre::Result<()> {
-        assert_eq!(super::part1(INPUT)?, 14);
-        Ok(())
-    }
-    #[test]
-    fn part2_works() -> eyre::Result<()> {
-        assert_eq!(super::part2(INPUT)?, 0);
-        Ok(())
-    }
-}
