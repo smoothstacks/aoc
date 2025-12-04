@@ -1,23 +1,21 @@
 mod parse {
-    use aoc_util::parse::{
-        nom::{
-            bytes::complete::tag,
-            character::complete::{digit1, newline, space1},
-            multi::separated_list1,
-            sequence::preceded,
-            IResult, Parser,
-        },
-        parse_num,
+    use aoc_util::parse::nom::{
+        bytes::complete::tag,
+        character::complete::{digit1, newline, space1, u64},
+        multi::separated_list1,
+        sequence::{preceded, separated_pair},
+        IResult, Parser,
     };
 
     use super::*;
 
     pub fn parse(input: &str) -> IResult<&str, Vec<Race>> {
-        let (input, times) =
-            preceded(tag("Time:"), separated_list1(space1, parse_num)).parse(input)?;
-        let (input, _) = newline(input)?;
-        let (input, distances) =
-            preceded(tag("Distance:"), separated_list1(space1, parse_num)).parse(input)?;
+        let (_, (times, distances)) = separated_pair(
+            preceded((tag("Time:"), space1), separated_list1(space1, u64)),
+            newline,
+            preceded((tag("Distance:"), space1), separated_list1(space1, u64)),
+        )
+        .parse(input)?;
 
         let races = times
             .into_iter()
@@ -29,11 +27,12 @@ mod parse {
     }
 
     pub fn parse_single(input: &str) -> IResult<&str, Race> {
-        let (input, times) =
-            preceded((tag("Time:"), space1), separated_list1(space1, digit1)).parse(input)?;
-        let (input, _) = newline(input)?;
-        let (input, distances) =
-            preceded((tag("Distance:"), space1), separated_list1(space1, digit1)).parse(input)?;
+        let (_, (times, distances)) = separated_pair(
+            preceded((tag("Time:"), space1), separated_list1(space1, digit1)),
+            newline,
+            preceded((tag("Distance:"), space1), separated_list1(space1, digit1)),
+        )
+        .parse(input)?;
 
         let time = times.join("").parse::<u64>().expect("times should join");
         let distance = distances
