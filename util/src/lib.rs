@@ -20,19 +20,19 @@ pub mod chargrid {
     use std::hash::Hash;
 
     #[derive(Debug, Clone, derive_more::From, derive_more::Deref)]
-    pub struct CharGrid<'a>(Vec<&'a str>);
+    pub struct CharGrid<'a>(&'a str);
 
     impl<'a> CharGrid<'a> {
         pub fn new(input: &'a str) -> Self {
-            Self(input.lines().collect())
+            Self(input)
         }
 
         pub fn get(&self, CharGridVec(x, y): CharGridVec) -> Option<char> {
-            self.0.get(y as usize)?.chars().nth(x as usize)
+            self.0.lines().nth(y as usize)?.chars().nth(x as usize)
         }
 
         pub fn find(&self, c: char) -> Option<CharGridVec> {
-            for (y, line) in self.0.iter().enumerate() {
+            for (y, line) in self.0.lines().enumerate() {
                 if let Some(x) = line.find(c) {
                     return Some(CharGridVec(x as isize, y as isize));
                 }
@@ -42,7 +42,7 @@ pub mod chargrid {
         }
 
         pub fn find_all(&'a self, c: char) -> impl Iterator<Item = Position> + use<'a> {
-            self.0.iter().enumerate().flat_map(move |(y, line)| {
+            self.0.lines().enumerate().flat_map(move |(y, line)| {
                 line.chars().enumerate().filter_map(move |(x, c2)| {
                     if c == c2 {
                         Some(CharGridVec(x as isize, y as isize))
@@ -57,7 +57,11 @@ pub mod chargrid {
             pos.0 >= 0
                 && pos.1 >= 0
                 && pos.1 < self.0.len() as isize
-                && pos.0 < self.0[pos.1 as usize].len() as isize
+                && self
+                    .0
+                    .lines()
+                    .nth(pos.1 as usize)
+                    .is_some_and(|l| pos.0 < l.len() as isize)
         }
 
         pub fn cursor(&self, pos: CharGridVec) -> CharGridCursor<'_> {
