@@ -11,49 +11,43 @@ fn parse(input: &str) -> Vec<Vec<u8>> {
         .collect_vec()
 }
 
-fn calculate_jolts(bank: &[u8]) -> u8 {
-    let mut left = (0, bank[0]);
-    let mut right = (1, bank[1]);
-    let mut best = left.1 * 10 + right.1;
-    loop {
-        // look for right onwards for the max
-        for i in right.0 + 1..bank.len() {
-            if bank[i] >= right.1 {
-                right = (i, bank[i]);
-            }
-        }
-        // now search up to right for left
-        for i in 0..right.0 {
-            if bank[i] >= left.1 {
-                left = (i, bank[i]);
-            }
-        }
-
-        best = (left.1 * 10 + right.1).max(best);
-
-        if right.0 == bank.len() - 1 {
-            break;
-        }
-
-        left = right;
-        right = (right.0 + 1, bank[right.0 + 1]);
+fn jolts(bank: &[u8], batteries: usize) -> Option<u64> {
+    if batteries > bank.len() {
+        return None;
+    }
+    if batteries == 0 {
+        return Some(0);
     }
 
-    best
+    // find the highest digit in the right-most position
+    for d in (0..=9).rev() {
+        for (index, digit) in bank.iter().enumerate() {
+            if digit != &d {
+                continue;
+            }
+
+            if let Some(next) = jolts(&bank[index + 1..], batteries - 1) {
+                return Some(*digit as u64 * 10u64.pow(batteries as u32 - 1) + next);
+            }
+        }
+    }
+
+    None
 }
 
-pub fn part1(input: &str) -> eyre::Result<u32> {
+pub fn part1(input: &str) -> eyre::Result<u64> {
     let banks = parse(input);
-    Ok(banks.iter().map(|bank| calculate_jolts(&bank) as u32).sum())
+    Ok(banks.iter().filter_map(|bank| jolts(&bank, 2)).sum())
 }
-pub fn part2(_: &str) -> eyre::Result<u32> {
-    Ok(0)
+pub fn part2(input: &str) -> eyre::Result<u64> {
+    let banks = parse(input);
+    Ok(banks.iter().filter_map(|bank| jolts(&bank, 12)).sum())
 }
 
 #[cfg(test)]
 mod tests {
-    const INPUT: &str = "987654321111111
-811111111111119
+    const INPUT: &str = "811111111111119
+987654321111111
 234234234234278
 818181911112111";
 
@@ -64,7 +58,7 @@ mod tests {
     }
     #[test]
     fn part2_works() -> eyre::Result<()> {
-        assert_eq!(super::part2(INPUT)?, 0);
+        assert_eq!(super::part2(INPUT)?, 3121910778619);
         Ok(())
     }
 }
