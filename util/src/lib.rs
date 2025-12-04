@@ -1,10 +1,11 @@
+pub use euclid;
 pub use glam;
 
 pub mod parse {
     use std::str::FromStr;
 
     pub use nom;
-    use nom::{character::complete::digit0, combinator::map_res, AsChar, IResult, Input, Parser};
+    use nom::{AsChar, IResult, Input, Parser, character::complete::digit0, combinator::map_res};
 
     pub fn parse_num<I, T>(input: I) -> IResult<I, T>
     where
@@ -13,6 +14,180 @@ pub mod parse {
         T: FromStr,
     {
         map_res(digit0, |s: I| s.as_ref().parse::<T>()).parse(input)
+    }
+}
+
+pub mod grid {
+    use std::{fmt::Display, str::FromStr};
+
+    use euclid;
+
+    pub type Position = euclid::default::Vector2D<usize>;
+    pub type Vector = euclid::default::Vector2D<isize>;
+
+    pub struct Grid<T> {
+        dimensions: Position,
+        data: Box<[T]>,
+    }
+
+    impl<T: Display> Display for Grid<T> {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            for y in 0..self.dimensions.y {
+                for x in 0..self.dimensions.x {
+                    write!(f, "|{}", self.get(euclid::vec2(x, y)).unwrap())?;
+                }
+                writeln!(f, "|")?;
+            }
+
+            Ok(())
+        }
+    }
+
+    #[derive(Debug, derive_more::Display, derive_more::Error)]
+    pub enum Error {
+        NoData,
+        DataSizeMismatch,
+    }
+
+    impl<T> Grid<T> {
+        pub fn new(dimensions: Position, data: Vec<T>) -> Result<Self, Error> {
+            if data.len() != dimensions.x * dimensions.y {
+                return Err(Error::DataSizeMismatch);
+            }
+
+            Ok(Self {
+                dimensions,
+                data: data.into_boxed_slice(),
+            })
+        }
+
+        pub fn get(&self, p: Position) -> Option<&T> {
+            self.data.get(self.idx(p)?)
+        }
+        pub fn get_mut(&mut self, p: Position) -> Option<&mut T> {
+            self.data.get_mut(self.idx(p)?)
+        }
+
+        pub fn is_valid_position(&self, p: Position) -> bool {
+            p.x < self.dimensions.x && p.y < self.dimensions.y
+        }
+
+        pub fn get_dimensions(&self) -> Position {
+            self.dimensions
+        }
+
+        pub fn position_iter(&self) -> impl Iterator<Item = Position> + use<T> {
+            let [dx, dy] = self.dimensions.to_array();
+            (0..dy).flat_map(move |y| (0..dx).map(move |x| euclid::vec2(x, y)))
+        }
+
+        pub fn iter(&self) -> impl Iterator<Item = &T> {
+            self.data.iter()
+        }
+        pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut T> {
+            self.data.iter_mut()
+        }
+
+        pub fn enumerate(&self) -> impl Iterator<Item = (Position, &T)> {
+            self.position_iter().zip(self.iter())
+        }
+        pub fn enumerate_mut(&mut self) -> impl Iterator<Item = (Position, &mut T)> {
+            self.position_iter().zip(self.iter_mut())
+        }
+
+        pub fn iter_pattern(
+            &self,
+            from: Position,
+            pattern: impl Iterator<Item = Vector>,
+        ) -> impl Iterator<Item = (Position, &T)> {
+            pattern.filter_map(move |p| {
+                let next = euclid::vec2(
+                    from.x.checked_add_signed(p.x)?,
+                    from.y.checked_add_signed(p.y)?,
+                );
+
+                Some((next, self.get(next)?))
+            })
+        }
+
+        fn idx(&self, n: Position) -> Option<usize> {
+            self.is_valid_position(n)
+                .then_some(n.y * self.dimensions.y + n.x)
+        }
+        fn pos(&self, idx: usize) -> Option<Position> {
+            (idx < self.data.len()).then_some({
+                let x = idx % self.dimensions.y;
+                let y = idx / self.dimensions.y;
+                euclid::vec2(x, y)
+            })
+        }
+    }
+
+    impl<T: Clone> Grid<T> {
+        pub fn splat(dimensions: Position, value: T) -> Self {
+            Self {
+                dimensions,
+                data: vec![value; dimensions.x * dimensions.y].into_boxed_slice(),
+            }
+        }
+    }
+
+    impl<T: PartialEq> Grid<T> {
+        pub fn find_all<'a, 'b>(
+            &'a self,
+            cmp: &'b T,
+        ) -> impl Iterator<Item = Position> + use<'a, 'b, T> {
+            // SAFETY: only check in self.pos is whether input is a valid index,
+            //  we guarantee that by iterating data
+            self.data
+                .iter()
+                .enumerate()
+                .filter_map(move |(i, t)| (cmp == t).then_some(self.pos(i).unwrap()))
+        }
+    }
+
+    impl FromStr for Grid<char> {
+        type Err = Error;
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            if s.is_empty() {
+                return Err(Error::NoData);
+            }
+
+            let y = s.lines().count();
+            let x = s
+                .lines()
+                .map(|l| l.chars().count())
+                .max()
+                .ok_or(Error::NoData)?;
+
+            let data: Vec<_> = s.lines().flat_map(|c| c.chars()).collect();
+
+            Self::new(euclid::vec2(x, y), data)
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use std::str::FromStr;
+
+        use crate::grid::Grid;
+
+        #[test]
+        fn new_works() {
+            let s = "ab\ncd";
+            let grid = super::Grid::from_str(s).unwrap();
+            assert_eq!(grid.dimensions, euclid::vec2(2, 2));
+            assert_eq!(grid.data.as_ref(), &['a', 'b', 'c', 'd']);
+        }
+
+        #[test]
+        fn get() {
+            let grid = Grid::new(euclid::vec2(2, 2), vec![1, 2, 3, 4]).unwrap();
+            assert_eq!(grid.get(euclid::vec2(0, 0)), Some(&1));
+            assert_eq!(grid.get(euclid::vec2(1, 0)), Some(&2));
+            assert_eq!(grid.get(euclid::vec2(0, 1)), Some(&3));
+            assert_eq!(grid.get(euclid::vec2(1, 1)), Some(&4));
+        }
     }
 }
 

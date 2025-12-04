@@ -1,6 +1,6 @@
 [workspace.package]
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [workspace]
 members = ["years/*/*", "util"]
@@ -17,3 +17,4 @@ nom = "8.0.0"
 derive_more = { version = "*", features = ["full"] }
 strum = { version = "*", features = ["derive"] }
 glam = "0.30.9"
+euclid = "0.22.11"
