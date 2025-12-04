@@ -1,21 +1,14 @@
-use aoc_util::parse::nom::{
-    character::complete::{char, usize},
-    multi::separated_list1,
-    sequence::separated_pair,
-    IResult, Parser,
+use aoc_util::{
+    math::num_digits,
+    parse::nom::{
+        character::complete::{char, usize},
+        multi::separated_list1,
+        sequence::separated_pair,
+        IResult, Parser,
+    },
 };
 use itertools::Itertools;
 use std::{num::NonZero, ops::RangeInclusive};
-
-fn num_digits(mut n: usize) -> usize {
-    let mut count = 0;
-    while n > 0 {
-        n /= 10;
-        count += 1;
-    }
-
-    count
-}
 
 fn parse(input: &str) -> IResult<&str, Vec<RangeInclusive<usize>>> {
     separated_list1(

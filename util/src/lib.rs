@@ -1,6 +1,56 @@
 pub use euclid;
 pub use glam;
 
+pub mod math {
+    use num::Unsigned;
+
+    pub fn num_digits<T>(mut n: T) -> usize
+    where
+        T: num::PrimInt + Unsigned,
+    {
+        let ten = T::from(10u8).expect("primitive ints can be created from u8");
+
+        let mut count = 0;
+        while n > num::zero() {
+            n = n / ten;
+            count += 1;
+        }
+
+        count
+    }
+
+    pub fn split_num_at<T>(n: T, at: usize) -> (T, T)
+    where
+        T: num::PrimInt + Unsigned,
+    {
+        let ten = T::from(10u8).expect("primitive ints can be created from u8");
+        let pow = ten.pow(at as u32);
+        let right = n % pow;
+        let left = (n - right) / pow;
+        (left, right)
+    }
+
+    #[cfg(test)]
+    mod tests {
+        #[test]
+        fn num_digits() {
+            assert_eq!(super::num_digits(999u64), 3);
+            assert_eq!(super::num_digits(999u32), 3);
+            assert_eq!(super::num_digits(999u16), 3);
+            assert_eq!(super::num_digits(111u8), 3);
+            assert_eq!(super::num_digits(8291469824u64), 10);
+        }
+
+        #[test]
+        fn split_num_at() {
+            assert_eq!(super::split_num_at(123456u32, 3), (123, 456));
+            assert_eq!(super::split_num_at(0u32, 3), (0, 0));
+            assert_eq!(super::split_num_at(10u32, 1), (1, 0));
+            assert_eq!(super::split_num_at(1000u32, 2), (10, 0));
+        }
+    }
+}
+
 pub mod parse {
     use std::str::FromStr;
 

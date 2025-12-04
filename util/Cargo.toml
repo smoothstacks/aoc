@@ -8,3 +8,4 @@ nom.workspace = true
 derive_more.workspace = true
 glam.workspace = true
 euclid.workspace = true
+num = "0.4.3"
