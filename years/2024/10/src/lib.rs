@@ -1,20 +1,20 @@
-use aoc_util::chargrid::{self, CharGrid, CharGridVec, Direction, Position};
-use std::collections::HashSet;
+use aoc_util::grid::*;
+use std::{collections::HashSet, str::FromStr};
 
-fn height_at(grid: &CharGrid<'_>, p: CharGridVec) -> Option<u32> {
+fn height_at(grid: &Grid<char>, p: Position) -> Option<u32> {
     grid.get(p).and_then(|c| c.to_digit(10))
 }
 
 fn valid_directions<'a>(
-    grid: &'a CharGrid<'a>,
+    grid: &'a Grid<char>,
     pos: Position,
     current: u32,
-) -> impl Iterator<Item = CharGridVec> + 'a {
-    const DIRECTIONS: [Direction; 4] = [
-        CharGridVec(0, 1),
-        CharGridVec(1, 0),
-        CharGridVec(0, -1),
-        CharGridVec(-1, 0),
+) -> impl Iterator<Item = Position> + 'a {
+    const DIRECTIONS: [Vector; 4] = [
+        Vector::new(0, 1),
+        Vector::new(1, 0),
+        Vector::new(0, -1),
+        Vector::new(-1, 0),
     ];
 
     DIRECTIONS
@@ -29,7 +29,7 @@ fn valid_directions<'a>(
         .copied()
 }
 
-fn find_unique_peaks(grid: &CharGrid, from: Position, found: &mut HashSet<Position>) {
+fn find_unique_peaks(grid: &Grid<char>, from: Position, found: &mut HashSet<Position>) {
     let current = height_at(grid, from);
 
     match current {
@@ -45,7 +45,7 @@ fn find_unique_peaks(grid: &CharGrid, from: Position, found: &mut HashSet<Positi
     };
 }
 
-fn find_unique_trails(grid: &CharGrid, from: Position) -> u32 {
+fn find_unique_trails(grid: &Grid<char>, from: Position) -> u32 {
     let current = height_at(grid, from);
     match current {
         Some(9) => 1,
@@ -61,8 +61,8 @@ fn find_unique_trails(grid: &CharGrid, from: Position) -> u32 {
 }
 
 pub fn part1(input: &str) -> eyre::Result<u32> {
-    let grid = chargrid::CharGrid::new(input);
-    let start_positions = grid.find_all('0');
+    let grid = Grid::from_str(input)?;
+    let start_positions = grid.find_all(&'0');
 
     let mut total = 0;
     for pos in start_positions {
@@ -74,8 +74,8 @@ pub fn part1(input: &str) -> eyre::Result<u32> {
     Ok(total as u32)
 }
 pub fn part2(input: &str) -> eyre::Result<u32> {
-    let grid = chargrid::CharGrid::new(input);
-    let start_positions = grid.find_all('0');
+    let grid = Grid::from_str(input)?;
+    let start_positions = grid.find_all(&'0');
 
     let mut total = 0;
     for pos in start_positions {

@@ -4,7 +4,7 @@ mod parse {
     use aoc_util::parse::{
         nom::{
             bytes::complete::tag,
-            character::complete::{line_ending, space0, space1},
+            character::complete::{char, line_ending, space0, space1, usize},
             multi::separated_list1,
             sequence::{preceded, separated_pair},
             IResult, Parser,
@@ -16,12 +16,13 @@ mod parse {
 
     pub fn parse(input: &str) -> IResult<&str, Vec<Card>> {
         fn parse_numbers_list(input: &str) -> IResult<&str, Vec<u32>> {
+            let (input, _) = space0(input)?;
             separated_list1(space1, parse_num).parse(input)
         }
 
         fn parse_card(input: &str) -> IResult<&str, Card> {
-            let (input, id): (&str, usize) = preceded(tag("Card"), parse_num).parse(input)?;
-            let (input, _) = preceded(tag(": "), space0).parse(input)?;
+            let (input, id) = preceded((tag("Card"), space1), usize).parse(input)?;
+            let (input, _) = (char(':'), space0).parse(input)?;
             let (input, (numbers, winning_numbers)) =
                 separated_pair(parse_numbers_list, tag(" | "), parse_numbers_list).parse(input)?;
 

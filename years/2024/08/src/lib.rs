@@ -1,4 +1,4 @@
-use aoc_util::chargrid::CharGridVec;
+use aoc_util::euclid;
 use itertools::Itertools;
 use std::collections::HashSet;
 
@@ -12,7 +12,10 @@ pub fn part2(input: &str) -> eyre::Result<usize> {
 }
 
 #[derive(Debug, Clone, Copy, Hash)]
-struct CoordPair(CharGridVec, CharGridVec);
+struct CoordPair(
+    euclid::default::Vector2D<isize>,
+    euclid::default::Vector2D<isize>,
+);
 
 struct Map<'a> {
     lines: Vec<&'a str>,
@@ -33,11 +36,14 @@ impl<'a> Map<'a> {
         }
     }
 
-    pub fn antennae(&self, frequency: char) -> impl Iterator<Item = CharGridVec> + Clone + '_ {
+    pub fn antennae(
+        &self,
+        frequency: char,
+    ) -> impl Iterator<Item = euclid::default::Vector2D<isize>> + Clone + '_ {
         self.lines.iter().enumerate().flat_map(move |(y, l)| {
             l.chars().enumerate().filter_map(move |(x, c)| {
                 if c == frequency {
-                    Some((x as isize, y as isize).into())
+                    Some(euclid::vec2(x as isize, y as isize))
                 } else {
                     None
                 }
@@ -45,14 +51,20 @@ impl<'a> Map<'a> {
         })
     }
 
-    pub fn is_valid_position(&self, CharGridVec(x, y): CharGridVec) -> bool {
+    pub fn is_valid_position(
+        &self,
+        euclid::default::Vector2D { x, y, .. }: euclid::default::Vector2D<isize>,
+    ) -> bool {
         x >= 0
             && y >= 0
             && y < self.lines.len() as isize
             && x < self.lines[y as usize].len() as isize
     }
 
-    pub fn antinodes(&self, resonance: bool) -> impl Iterator<Item = CharGridVec> + Clone + '_ {
+    pub fn antinodes(
+        &self,
+        resonance: bool,
+    ) -> impl Iterator<Item = euclid::default::Vector2D<isize>> + Clone + '_ {
         self.frequencies
             .iter()
             .flat_map(move |frequency| {

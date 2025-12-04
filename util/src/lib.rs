@@ -20,21 +20,25 @@ pub mod parse {
 pub mod grid {
     use std::{fmt::Display, str::FromStr};
 
-    use euclid;
-
-    pub type Position = euclid::default::Vector2D<usize>;
+    pub type Position = euclid::default::Vector2D<isize>;
     pub type Vector = euclid::default::Vector2D<isize>;
 
+    type Size = euclid::default::Size2D<usize>;
+
     pub struct Grid<T> {
-        dimensions: Position,
+        dimensions: Size,
         data: Box<[T]>,
     }
 
     impl<T: Display> Display for Grid<T> {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            for y in 0..self.dimensions.y {
-                for x in 0..self.dimensions.x {
-                    write!(f, "|{}", self.get(euclid::vec2(x, y)).unwrap())?;
+            for y in 0..self.dimensions.width {
+                for x in 0..self.dimensions.height {
+                    write!(
+                        f,
+                        "|{}",
+                        self.get(euclid::vec2(x as isize, y as isize)).unwrap()
+                    )?;
                 }
                 writeln!(f, "|")?;
             }
@@ -50,8 +54,8 @@ pub mod grid {
     }
 
     impl<T> Grid<T> {
-        pub fn new(dimensions: Position, data: Vec<T>) -> Result<Self, Error> {
-            if data.len() != dimensions.x * dimensions.y {
+        pub fn new(dimensions: Size, data: Vec<T>) -> Result<Self, Error> {
+            if data.len() != dimensions.width * dimensions.height {
                 return Err(Error::DataSizeMismatch);
             }
 
@@ -69,16 +73,19 @@ pub mod grid {
         }
 
         pub fn is_valid_position(&self, p: Position) -> bool {
-            p.x < self.dimensions.x && p.y < self.dimensions.y
+            p.x >= 0
+                && (p.x as usize) < self.dimensions.width
+                && (p.y >= 0)
+                && (p.y as usize) < self.dimensions.height
         }
 
-        pub fn get_dimensions(&self) -> Position {
+        pub fn get_dimensions(&self) -> Size {
             self.dimensions
         }
 
         pub fn position_iter(&self) -> impl Iterator<Item = Position> + use<T> {
             let [dx, dy] = self.dimensions.to_array();
-            (0..dy).flat_map(move |y| (0..dx).map(move |x| euclid::vec2(x, y)))
+            (0..dy).flat_map(move |y| (0..dx).map(move |x| euclid::vec2(x as isize, y as isize)))
         }
 
         pub fn iter(&self) -> impl Iterator<Item = &T> {
@@ -101,33 +108,29 @@ pub mod grid {
             pattern: impl Iterator<Item = Vector>,
         ) -> impl Iterator<Item = (Position, &T)> {
             pattern.filter_map(move |p| {
-                let next = euclid::vec2(
-                    from.x.checked_add_signed(p.x)?,
-                    from.y.checked_add_signed(p.y)?,
-                );
-
+                let next = from + p;
                 Some((next, self.get(next)?))
             })
         }
 
         fn idx(&self, n: Position) -> Option<usize> {
             self.is_valid_position(n)
-                .then_some(n.y * self.dimensions.y + n.x)
+                .then(|| n.y as usize * self.dimensions.height + n.x as usize)
         }
         fn pos(&self, idx: usize) -> Option<Position> {
             (idx < self.data.len()).then_some({
-                let x = idx % self.dimensions.y;
-                let y = idx / self.dimensions.y;
-                euclid::vec2(x, y)
+                let x = idx % self.dimensions.height;
+                let y = idx / self.dimensions.height;
+                euclid::vec2(x as isize, y as isize)
             })
         }
     }
 
     impl<T: Clone> Grid<T> {
-        pub fn splat(dimensions: Position, value: T) -> Self {
+        pub fn splat(dimensions: Size, value: T) -> Self {
             Self {
                 dimensions,
-                data: vec![value; dimensions.x * dimensions.y].into_boxed_slice(),
+                data: vec![value; dimensions.width * dimensions.height].into_boxed_slice(),
             }
         }
     }
@@ -143,6 +146,16 @@ pub mod grid {
                 .iter()
                 .enumerate()
                 .filter_map(move |(i, t)| (cmp == t).then_some(self.pos(i).unwrap()))
+        }
+
+        pub fn position_of(&self, cmp: &T) -> Option<Position> {
+            for (i, t) in self.data.iter().enumerate() {
+                if cmp == t {
+                    return self.pos(i);
+                }
+            }
+
+            return None;
         }
     }
 
@@ -162,7 +175,7 @@ pub mod grid {
 
             let data: Vec<_> = s.lines().flat_map(|c| c.chars()).collect();
 
-            Self::new(euclid::vec2(x, y), data)
+            Self::new(euclid::size2(x, y), data)
         }
     }
 
@@ -176,150 +189,17 @@ pub mod grid {
         fn new_works() {
             let s = "ab\ncd";
             let grid = super::Grid::from_str(s).unwrap();
-            assert_eq!(grid.dimensions, euclid::vec2(2, 2));
+            assert_eq!(grid.dimensions, euclid::size2(2, 2));
             assert_eq!(grid.data.as_ref(), &['a', 'b', 'c', 'd']);
         }
 
         #[test]
         fn get() {
-            let grid = Grid::new(euclid::vec2(2, 2), vec![1, 2, 3, 4]).unwrap();
+            let grid = Grid::new(euclid::size2(2, 2), vec![1, 2, 3, 4]).unwrap();
             assert_eq!(grid.get(euclid::vec2(0, 0)), Some(&1));
             assert_eq!(grid.get(euclid::vec2(1, 0)), Some(&2));
             assert_eq!(grid.get(euclid::vec2(0, 1)), Some(&3));
             assert_eq!(grid.get(euclid::vec2(1, 1)), Some(&4));
-        }
-    }
-}
-
-pub mod chargrid {
-    use std::hash::Hash;
-
-    #[derive(Debug, Clone, derive_more::From, derive_more::Deref)]
-    pub struct CharGrid<'a>(&'a str);
-
-    impl<'a> CharGrid<'a> {
-        pub fn new(input: &'a str) -> Self {
-            Self(input)
-        }
-
-        pub fn get(&self, CharGridVec(x, y): CharGridVec) -> Option<char> {
-            self.0.lines().nth(y as usize)?.chars().nth(x as usize)
-        }
-
-        pub fn find(&self, c: char) -> Option<CharGridVec> {
-            for (y, line) in self.0.lines().enumerate() {
-                if let Some(x) = line.find(c) {
-                    return Some(CharGridVec(x as isize, y as isize));
-                }
-            }
-
-            None
-        }
-
-        pub fn find_all(&'a self, c: char) -> impl Iterator<Item = Position> + use<'a> {
-            self.0.lines().enumerate().flat_map(move |(y, line)| {
-                line.chars().enumerate().filter_map(move |(x, c2)| {
-                    if c == c2 {
-                        Some(CharGridVec(x as isize, y as isize))
-                    } else {
-                        None
-                    }
-                })
-            })
-        }
-
-        pub fn is_valid_position(&self, pos: CharGridVec) -> bool {
-            pos.0 >= 0
-                && pos.1 >= 0
-                && pos.1 < self.0.len() as isize
-                && self
-                    .0
-                    .lines()
-                    .nth(pos.1 as usize)
-                    .is_some_and(|l| pos.0 < l.len() as isize)
-        }
-
-        pub fn cursor(&self, pos: CharGridVec) -> CharGridCursor<'_> {
-            CharGridCursor::new(self, pos)
-        }
-    }
-
-    pub struct CharGridCursor<'a> {
-        grid: &'a CharGrid<'a>,
-        pos: CharGridVec,
-    }
-    impl<'a> CharGridCursor<'a> {
-        pub fn new(grid: &'a CharGrid<'a>, pos: CharGridVec) -> Self {
-            Self { grid, pos }
-        }
-
-        pub fn get(&self) -> Option<char> {
-            self.grid.get(self.pos)
-        }
-
-        pub fn move_to(&mut self, pos: CharGridVec) {
-            self.pos = pos;
-        }
-
-        pub fn move_by(&mut self, dir: CharGridVec) {
-            self.pos = self.pos + dir;
-        }
-
-        pub fn peek(&self, dir: CharGridVec) -> Option<char> {
-            self.grid.get(self.pos + dir)
-        }
-    }
-
-    #[derive(
-        Hash,
-        Debug,
-        Clone,
-        Copy,
-        PartialEq,
-        Eq,
-        derive_more::From,
-        derive_more::Add,
-        derive_more::Display,
-    )]
-    #[display("(x={}, y={})", self.0, self.1)]
-    pub struct CharGridVec(pub isize, pub isize);
-
-    pub type Position = CharGridVec;
-    pub type Direction = CharGridVec;
-
-    impl Direction {
-        pub fn rotate(&self, clockwise: bool) -> Self {
-            if clockwise {
-                Self(-self.1, self.0)
-            } else {
-                Self(self.1, -self.0)
-            }
-        }
-    }
-
-    impl std::ops::Mul<isize> for CharGridVec {
-        type Output = Self;
-
-        fn mul(self, rhs: isize) -> Self::Output {
-            Self(self.0 * rhs, self.1 * rhs)
-        }
-    }
-    impl std::ops::Sub<Self> for CharGridVec {
-        type Output = Direction;
-
-        fn sub(self, rhs: Self) -> Self::Output {
-            Self(self.0 - rhs.0, self.1 - rhs.1)
-        }
-    }
-
-    #[cfg(test)]
-    mod tests {
-        use super::*;
-
-        #[test]
-        fn rotate() {
-            let direction = CharGridVec(0, -1);
-            assert_eq!(direction.rotate(true), CharGridVec(1, 0));
         }
     }
 }
