@@ -66,7 +66,7 @@ mod tests {
     }
     #[test]
     fn part2_works() -> eyre::Result<()> {
-        assert_eq!(super::part2(INPUT)?, 0);
+        assert_eq!(super::part2(INPUT)?, 65601038650482);
         Ok(())
     }
 }
