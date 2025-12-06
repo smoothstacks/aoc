@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::LazyLock};
 use aoc_util::parse::{
     nom::{
         bytes::complete::tag,
-        character::complete::{alpha1, newline},
+        character::complete::{alpha1, newline, u16},
         multi::separated_list1,
         sequence::{preceded, separated_pair},
         IResult, Parser,
@@ -33,7 +33,7 @@ struct AuntSue<'a> {
 
 fn parse_sue(input: &str) -> IResult<&str, AuntSue<'_>> {
     separated_pair(
-        preceded(tag("Sue "), parse_num),
+        preceded(tag("Sue "), u16),
         tag(": "),
         separated_list1(tag(", "), separated_pair(alpha1, tag(": "), parse_num)),
     )

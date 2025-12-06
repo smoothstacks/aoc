@@ -41,6 +41,8 @@ pub fn part2(input: &str) -> eyre::Result<u32> {
 
 #[cfg(test)]
 mod tests {
+    use std::process::Termination;
+
     const INPUT: &str = "..@@.@@@@.
 @@@.@.@.@@
 @@@@@.@.@@
