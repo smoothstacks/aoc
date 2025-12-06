@@ -1,10 +1,10 @@
 mod parse {
     use aoc_util::parse::nom::{
+        IResult, Parser,
         bytes::complete::tag,
         character::complete::{digit1, newline, space1, u64},
         multi::separated_list1,
         sequence::{preceded, separated_pair},
-        IResult, Parser,
     };
 
     use super::*;
@@ -63,16 +63,16 @@ impl Race {
     }
 }
 
-pub fn part1(input: &str) -> u64 {
+pub fn part1(input: &str) -> eyre::Result<u64> {
     let (_, races) = parse::parse(input).expect("parse works");
-    races
+    Ok(races
         .iter()
         .map(|r| r.winning_times().count() as u64)
-        .product()
+        .product())
 }
-pub fn part2(input: &str) -> u64 {
+pub fn part2(input: &str) -> eyre::Result<u64> {
     let (_, race) = parse::parse_single(input).expect("parse works");
-    race.winning_times().count() as u64
+    Ok(race.winning_times().count() as u64)
 }
 
 #[cfg(test)]
@@ -81,11 +81,13 @@ mod tests {
 Distance:  9  40  200";
 
     #[test]
-    fn part1_works() {
-        assert_eq!(super::part1(INPUT), 288);
+    fn part1_works() -> eyre::Result<()> {
+        assert_eq!(super::part1(INPUT)?, 288);
+        Ok(())
     }
     #[test]
-    fn part2_works() {
-        assert_eq!(super::part2(INPUT), 71503);
+    fn part2_works() -> eyre::Result<()> {
+        assert_eq!(super::part2(INPUT)?, 71503);
+        Ok(())
     }
 }

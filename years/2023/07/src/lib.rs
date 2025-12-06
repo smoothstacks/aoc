@@ -2,11 +2,11 @@ use std::collections::HashMap;
 
 mod parse {
     use aoc_util::parse::nom::{
+        IResult, Parser,
         character::complete::{anychar, digit1, newline, space1},
         combinator::{map_opt, map_res},
         multi::{count, separated_list1},
         sequence::separated_pair,
-        IResult, Parser,
     };
 
     use super::*;
@@ -127,18 +127,18 @@ impl std::fmt::Debug for Hand {
     }
 }
 
-pub fn part1(input: &str) -> u32 {
+pub fn part1(input: &str) -> eyre::Result<u32> {
     let (_, mut hands) = parse::parse(input).expect("parse works");
     hands.sort_by(|a, b| a.0.cmp(&b.0));
-    hands
+    Ok(hands
         .iter()
         .enumerate()
         .map(|(i, (_, bid))| bid * (i + 1) as u32)
-        .sum()
+        .sum())
 }
 
-pub fn part2(_input: &str) -> u32 {
-    0
+pub fn part2(_input: &str) -> eyre::Result<u32> {
+    Ok(0)
 }
 
 #[cfg(test)]
@@ -152,12 +152,14 @@ KTJJT 220
 QQQJA 483";
 
     #[test]
-    fn part1_works() {
-        assert_eq!(super::part1(INPUT), 6440);
+    fn part1_works() -> eyre::Result<()> {
+        assert_eq!(super::part1(INPUT)?, 6440);
+        Ok(())
     }
     #[test]
-    fn part2_works() {
-        assert_eq!(super::part2(INPUT), 0);
+    fn part2_works() -> eyre::Result<()> {
+        assert_eq!(super::part2(INPUT)?, 0);
+        Ok(())
     }
 
     #[test]

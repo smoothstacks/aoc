@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use aoc_util::parse::nom::{
+    IResult, Parser,
     bytes::complete::tag,
     character::{
         char,
@@ -8,7 +9,6 @@ use aoc_util::parse::nom::{
     },
     multi::separated_list1,
     sequence::{separated_pair, terminated},
-    IResult, Parser,
 };
 use itertools::Itertools;
 

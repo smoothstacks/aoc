@@ -104,13 +104,13 @@ impl Game {
 
 mod parse {
     use aoc_util::parse::nom::{
+        Err, IResult, Parser,
         bytes::complete::tag,
         character::complete::{digit1, newline, space0, space1},
         combinator::map_res,
         error::{Error, ErrorKind},
         multi::separated_list0,
         sequence::{preceded, separated_pair},
-        Err, IResult, Parser,
     };
 
     use super::*;
@@ -186,7 +186,7 @@ mod parse {
     }
 }
 
-pub fn part1(input: &str) -> u32 {
+pub fn part1(input: &str) -> eyre::Result<u32> {
     let cubes = vec![
         Cube {
             color: Color::Red,
@@ -203,19 +203,19 @@ pub fn part1(input: &str) -> u32 {
     ];
     let (_, games) = parse::parse(input).expect("parse games should work");
 
-    games
+    Ok(games
         .iter()
         .filter_map(|game| game.is_possible(&cubes).then_some(game.id))
-        .sum()
+        .sum())
 }
 
-pub fn part2(input: &str) -> u32 {
+pub fn part2(input: &str) -> eyre::Result<u32> {
     let (_, games) = parse::parse(input).expect("parse games works");
-    games
+    Ok(games
         .iter()
         .map(|g| g.min_required_cubes())
         .map(|c| c.power())
-        .sum()
+        .sum())
 }
 
 #[cfg(test)]
@@ -227,13 +227,15 @@ Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
 Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
 
     #[test]
-    fn part1_works() {
-        assert_eq!(super::part1(INPUT), 8);
+    fn part1_works() -> eyre::Result<()> {
+        assert_eq!(super::part1(INPUT)?, 8);
+        Ok(())
     }
 
     #[test]
-    fn part2_works() {
-        assert_eq!(super::part2(INPUT), 2286)
+    fn part2_works() -> eyre::Result<()> {
+        assert_eq!(super::part2(INPUT)?, 2286);
+        Ok(())
     }
 
     #[test]

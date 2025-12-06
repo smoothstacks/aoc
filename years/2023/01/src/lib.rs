@@ -28,7 +28,7 @@ mod parse {
     }
 }
 
-pub fn part1(input: &str) -> u32 {
+pub fn part1(input: &str) -> eyre::Result<u32> {
     fn get_calibration_value<'a>(line: &'a str) -> u32 {
         let mut itr = line.chars().filter_map(|c| c.to_digit(10));
         let tens = itr.next().unwrap_or_default();
@@ -37,11 +37,11 @@ pub fn part1(input: &str) -> u32 {
         (tens * 10) + ones
     }
 
-    input.lines().map(get_calibration_value).sum()
+    Ok(input.lines().map(get_calibration_value).sum())
 }
 
-pub fn part2(input: &str) -> u32 {
-    input
+pub fn part2(input: &str) -> eyre::Result<u32> {
+    Ok(input
         .lines()
         .map(|line| {
             let mut itr = parse::calibration_digits(line);
@@ -49,23 +49,24 @@ pub fn part2(input: &str) -> u32 {
             let last = itr.last().unwrap_or(first);
             first * 10 + last
         })
-        .sum()
+        .sum())
 }
 
 #[cfg(test)]
 mod tests {
     #[test]
-    fn part1_works() {
+    fn part1_works() -> eyre::Result<()> {
         const INPUT: &str = "1abc2
 pqr3stu8vwx
 a1b2c3d4e5f
 treb7uchet";
 
-        assert_eq!(super::part1(INPUT), 142);
+        assert_eq!(super::part1(INPUT)?, 142);
+        Ok(())
     }
 
     #[test]
-    fn part2_works() {
+    fn part2_works() -> eyre::Result<()> {
         const INPUT: &str = "two1nine
 eightwothree
 abcone2threexyz
@@ -74,7 +75,8 @@ xtwone3four
 zoneight234
 7pqrstsixteen";
 
-        assert_eq!(super::part2(INPUT), 281);
+        assert_eq!(super::part2(INPUT)?, 281);
+        Ok(())
     }
 
     #[test]

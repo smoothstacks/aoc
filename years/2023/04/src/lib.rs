@@ -3,11 +3,11 @@ use std::collections::HashSet;
 mod parse {
     use aoc_util::parse::{
         nom::{
+            IResult, Parser,
             bytes::complete::tag,
             character::complete::{char, line_ending, space0, space1, usize},
             multi::separated_list1,
             sequence::{preceded, separated_pair},
-            IResult, Parser,
         },
         parse_num,
     };
@@ -61,11 +61,11 @@ impl Card {
     }
 }
 
-pub fn part1(input: &str) -> u32 {
+pub fn part1(input: &str) -> eyre::Result<u32> {
     let (_, cards) = parse::parse(input).expect("parse cards works");
-    cards.iter().map(|card| card.points()).sum()
+    Ok(cards.iter().map(|card| card.points()).sum())
 }
-pub fn part2(input: &str) -> u32 {
+pub fn part2(input: &str) -> eyre::Result<u32> {
     let (_, cards) = parse::parse(input).expect("parse cards works");
     let mut copies = vec![1u32; cards.len()];
 
@@ -79,7 +79,7 @@ pub fn part2(input: &str) -> u32 {
             *copy += copy_count;
         }
     }
-    copies.iter().sum()
+    Ok(copies.iter().sum())
 }
 
 #[cfg(test)]
@@ -93,11 +93,13 @@ Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
 Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11";
 
     #[test]
-    fn part1_works() {
-        assert_eq!(super::part1(INPUT), 13);
+    fn part1_works() -> eyre::Result<()> {
+        assert_eq!(super::part1(INPUT)?, 13);
+        Ok(())
     }
     #[test]
-    fn part2_works() {
-        assert_eq!(super::part2(INPUT), 30);
+    fn part2_works() -> eyre::Result<()> {
+        assert_eq!(super::part2(INPUT)?, 30);
+        Ok(())
     }
 }

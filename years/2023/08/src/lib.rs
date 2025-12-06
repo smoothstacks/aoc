@@ -3,12 +3,12 @@ use std::collections::HashMap;
 mod parse {
 
     use aoc_util::parse::nom::{
+        IResult, Parser,
         bytes::complete::{tag, take},
         character::complete::{anychar, line_ending},
         combinator::map_opt,
         multi::{count, many1, separated_list1},
         sequence::{delimited, separated_pair},
-        IResult, Parser,
     };
 
     use super::*;
@@ -138,13 +138,13 @@ impl Map<'_> {
     }
 }
 
-pub fn part1(input: &str) -> u32 {
+pub fn part1(input: &str) -> eyre::Result<u32> {
     let (_, (map, directions)) = parse::parse(input).expect("parse works");
-    map.path_length(START, &directions, |s| s == END) as u32
+    Ok(map.path_length(START, &directions, |s| s == END) as u32)
 }
-pub fn part2(input: &str) -> u32 {
+pub fn part2(input: &str) -> eyre::Result<u32> {
     let (_, (map, directions)) = parse::parse(input).expect("parse works");
-    map.follow_paths_2(&directions) as u32
+    Ok(map.follow_paths_2(&directions) as u32)
 }
 
 #[cfg(test)]
@@ -168,8 +168,8 @@ AAA = (BBB, BBB)
 BBB = (AAA, ZZZ)
 ZZZ = (ZZZ, ZZZ)";
 
-        assert_eq!(super::part1(INPUT_1), 2);
-        assert_eq!(super::part1(INPUT_2), 6);
+        assert_eq!(super::part1(INPUT_1).unwrap(), 2);
+        assert_eq!(super::part1(INPUT_2).unwrap(), 6);
     }
     #[test]
     fn part2_works() {
@@ -184,6 +184,6 @@ ZZZ = (ZZZ, ZZZ)";
 22Z = (22B, 22B)
 XXX = (XXX, XXX)";
 
-        assert_eq!(super::part2(INPUT), 6);
+        assert_eq!(super::part2(INPUT).unwrap(), 6);
     }
 }

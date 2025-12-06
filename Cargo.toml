@@ -18,6 +18,7 @@ derive_more = { version = "*", features = ["full"] }
 strum = { version = "*", features = ["derive"] }
 glam = "0.30.9"
 euclid = "0.22.11"
+divan = "0.1.21"
 
 [profile.release]
 debug = true

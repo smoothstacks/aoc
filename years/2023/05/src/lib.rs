@@ -1,13 +1,15 @@
+use indicatif::ParallelProgressIterator;
+use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use std::ops::Range;
 
 mod parse {
     use aoc_util::parse::{
         nom::{
+            IResult, Parser,
             bytes::complete::tag,
             character::complete::{alpha1, newline, space1},
             multi::separated_list1,
             sequence::{preceded, separated_pair},
-            IResult, Parser,
         },
         parse_num,
     };
@@ -93,32 +95,29 @@ impl Almanac {
     }
 }
 
-pub fn part1(input: &str) -> u32 {
+pub fn part1(input: &str) -> eyre::Result<u32> {
     let (_, almanac) = parse::parse(input).expect("parse works");
-    almanac
+    Ok(almanac
         .seeds
         .iter()
         .map(|seed| almanac.apply_seed(*seed))
         .min()
-        .unwrap() as u32
+        .unwrap() as u32)
 }
 
-use indicatif::ParallelProgressIterator;
-use rayon::prelude::{IntoParallelIterator, ParallelIterator};
-
-pub fn part2(input: &str) -> u64 {
+pub fn part2(input: &str) -> eyre::Result<u64> {
     let (_, almanac) = parse::parse(input).expect("parse works");
 
     let seeds = almanac.seed_ranges();
     let count: u64 = seeds.clone().into_iter().map(|r| r.count() as u64).sum();
 
-    seeds
+    Ok(seeds
         .into_par_iter()
         .flatten()
         .map(|seed| almanac.apply_seed(seed))
         .progress_count(count)
         .min()
-        .unwrap() as u64
+        .unwrap() as u64)
 }
 
 #[cfg(test)]
@@ -160,12 +159,14 @@ humidity-to-location map:
 56 93 4";
 
     #[test]
-    fn part1_works() {
-        assert_eq!(super::part1(INPUT), 35);
+    fn part1_works() -> eyre::Result<()> {
+        assert_eq!(super::part1(INPUT)?, 35);
+        Ok(())
     }
     #[test]
-    fn part2_works() {
-        assert_eq!(super::part2(INPUT), 46);
+    fn part2_works() -> eyre::Result<()> {
+        assert_eq!(super::part2(INPUT)?, 46);
+        Ok(())
     }
 
     #[test]

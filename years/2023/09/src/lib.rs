@@ -35,7 +35,7 @@ fn prev(itr: &[i64]) -> i64 {
     itr.first().unwrap() - prev_diff
 }
 
-pub fn part1(input: &str) -> i64 {
+pub fn part1(input: &str) -> eyre::Result<i64> {
     let sequences = parse::parse(input);
 
     let mut sum = 0;
@@ -43,10 +43,10 @@ pub fn part1(input: &str) -> i64 {
         sum += next(&sequence);
     }
 
-    sum
+    Ok(sum)
 }
 
-pub fn part2(input: &str) -> i64 {
+pub fn part2(input: &str) -> eyre::Result<i64> {
     let sequences = parse::parse(input);
 
     let mut sum = 0;
@@ -54,7 +54,7 @@ pub fn part2(input: &str) -> i64 {
         sum += prev(&sequence);
     }
 
-    sum
+    Ok(sum)
 }
 
 #[cfg(test)]
@@ -67,12 +67,14 @@ mod tests {
         "9 5 1 -3 -7 -11 -15 -19 -23 -27 -31 -35 -39 -43 -47 -51 -55 -59 -63 -67 -71";
 
     #[test]
-    fn part1_works() {
-        assert_eq!(super::part1(INPUT), 114);
-        assert_eq!(super::part1(INPUT_2), -75);
+    fn part1_works() -> eyre::Result<()> {
+        assert_eq!(super::part1(INPUT)?, 114);
+        assert_eq!(super::part1(INPUT_2)?, -75);
+        Ok(())
     }
     #[test]
-    fn part2_works() {
-        assert_eq!(super::part2(INPUT), 2);
+    fn part2_works() -> eyre::Result<()> {
+        assert_eq!(super::part2(INPUT)?, 2);
+        Ok(())
     }
 }

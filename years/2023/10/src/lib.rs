@@ -2,10 +2,10 @@ use std::fmt::Debug;
 
 mod parse {
     use aoc_util::parse::nom::{
+        Err, IResult, Parser,
         character::complete::{anychar, line_ending},
         error,
         multi::{many1, separated_list1},
-        Err, IResult, Parser,
     };
 
     use super::*;
@@ -173,12 +173,12 @@ enum Direction {
     West,
 }
 
-pub fn part1(input: &str) -> u32 {
+pub fn part1(input: &str) -> eyre::Result<u32> {
     let (_, _) = Map::parse(input).expect("should parse the map");
-    0
+    Ok(0)
 }
-pub fn part2(_input: &str) -> u32 {
-    0
+pub fn part2(_input: &str) -> eyre::Result<u32> {
+    Ok(0)
 }
 
 #[cfg(test)]
@@ -190,11 +190,13 @@ SJ.L7
 LJ...";
 
     #[test]
-    fn part1_works() {
-        assert_eq!(super::part1(INPUT), 0);
+    fn part1_works() -> eyre::Result<()> {
+        assert_eq!(super::part1(INPUT)?, 0);
+        Ok(())
     }
     #[test]
-    fn part2_works() {
-        assert_eq!(super::part2(INPUT), 0);
+    fn part2_works() -> eyre::Result<()> {
+        assert_eq!(super::part2(INPUT)?, 0);
+        Ok(())
     }
 }

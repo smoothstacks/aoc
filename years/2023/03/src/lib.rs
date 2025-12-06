@@ -2,10 +2,10 @@ use std::ops::RangeInclusive;
 
 mod parse {
     use aoc_util::parse::nom::{
+        IResult, Parser,
         bytes::complete::tag,
         character::complete::{anychar, digit1, newline},
         combinator::{consumed, map_res, opt},
-        IResult, Parser,
     };
 
     use super::*;
@@ -121,13 +121,13 @@ impl Schematic {
     }
 }
 
-pub fn part1(input: &str) -> u32 {
+pub fn part1(input: &str) -> eyre::Result<u32> {
     let (_, schematic) = parse::parse(input).expect("parse works");
-    schematic.valid_part_numbers().map(|p| p.value).sum()
+    Ok(schematic.valid_part_numbers().map(|p| p.value).sum())
 }
-pub fn part2(input: &str) -> u32 {
+pub fn part2(input: &str) -> eyre::Result<u32> {
     let (_, schematic) = parse::parse(input).expect("parse works");
-    schematic.gear_ratio_sum()
+    Ok(schematic.gear_ratio_sum())
 }
 
 #[cfg(test)]
@@ -144,12 +144,14 @@ mod tests {
 .664.598..";
 
     #[test]
-    fn part1_works() {
-        assert_eq!(super::part1(INPUT), 4361);
+    fn part1_works() -> eyre::Result<()> {
+        assert_eq!(super::part1(INPUT)?, 4361);
+        Ok(())
     }
     #[test]
-    fn part2_works() {
-        assert_eq!(super::part2(INPUT), 467835);
+    fn part2_works() -> eyre::Result<()> {
+        assert_eq!(super::part2(INPUT)?, 467835);
+        Ok(())
     }
 
     #[test]

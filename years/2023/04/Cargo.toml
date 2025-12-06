@@ -1,9 +1,16 @@
 [package]
 name = "aoc2023day04"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
 aoc-util.workspace = true
+eyre.workspace = true
+
+[dev-dependencies]
+divan.workspace = true
+
+[[bench]]
+name = "aoc2023day04-bench"
+path = "benches/benchmarks.rs"
+harness = false
