@@ -1,0 +1,17 @@
+[package]
+name = "aoc2025day07"
+version.workspace = true
+edition.workspace = true
+
+[[bench]]
+name = "aoc2025day07-bench"
+path = "benches/benchmarks.rs"
+harness = false
+
+[dependencies]
+aoc-util.workspace = true
+itertools.workspace = true
+eyre.workspace = true
+
+[dev-dependencies]
+divan.workspace = true

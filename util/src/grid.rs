@@ -1,4 +1,7 @@
-use std::{fmt::Display, str::FromStr};
+use std::{
+    fmt::{Debug, Display},
+    str::FromStr,
+};
 
 pub type Position = euclid::default::Vector2D<isize>;
 pub type Vector = euclid::default::Vector2D<isize>;
@@ -100,6 +103,17 @@ impl<T> Grid<T> {
         })
     }
 
+    pub fn enumerate_column(
+        &self,
+        column: usize,
+    ) -> impl DoubleEndedIterator<Item = (Position, &T)> {
+        (0..self.dimensions.height).filter_map(move |row| {
+            let pos = Position::new(column as isize, row as isize);
+            let idx = self.idx(pos)?;
+            Some((pos, &self.data[idx]))
+        })
+    }
+
     pub fn iter_pattern(
         &self,
         from: Position,
@@ -108,6 +122,17 @@ impl<T> Grid<T> {
         pattern.filter_map(move |p| {
             let next = from + p;
             Some((next, self.get(next)?))
+        })
+    }
+
+    pub fn iter_direction(
+        &self,
+        mut pos: Position,
+        direction: Vector,
+    ) -> impl Iterator<Item = (Position, &T)> {
+        std::iter::from_fn(move || {
+            pos += direction;
+            Some((pos, self.get(pos)?))
         })
     }
 

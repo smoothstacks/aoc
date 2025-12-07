@@ -10,6 +10,9 @@ bench year day:
     #!/bin/bash
     day=`printf %02d {{day}}`
     cargo bench -p aoc{{year}}day${day}
+time year day:
+    #!/bin/bash
+    time just run {{year}} {{day}} ;
 create year day:
     #!/bin/bash
     day=`printf %02d {{day}}`
