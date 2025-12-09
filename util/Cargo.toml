@@ -3,9 +3,18 @@ name = "aoc-util"
 version.workspace = true
 edition.workspace = true
 
+[[bin]]
+name = "getinput"
+path = "scripts/getinput.rs"
+
 [dependencies]
 nom.workspace = true
 derive_more.workspace = true
 glam.workspace = true
 euclid.workspace = true
+eyre.workspace = true
+
 num = "0.4.3"
+
+clap = { version = "4.5.53", features = ["derive", "env"] }
+ureq = { version = "3.1.4" }

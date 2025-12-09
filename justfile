@@ -26,4 +26,6 @@ create year day:
     day=`printf %02d {{day}}`
 
     mkdir -p years/{{year}}/${day}
-    cd years/{{year}}/${day};  cargo generate --path ../../../.template --name aoc{{year}}day${day} --init;
+    cd years/{{year}}/${day};
+    cargo generate --path ../../../.template --name aoc{{year}}day${day} --init;
+    cargo r -p aoc-util --bin getinput --release {{year}} {{day}} --out input.txt
