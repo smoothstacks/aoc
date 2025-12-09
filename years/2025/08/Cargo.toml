@@ -1,22 +1,20 @@
 [package]
-name = "aoc2015day09"
+name = "aoc2025day08"
 version.workspace = true
 edition.workspace = true
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bench]]
+name = "aoc2025day08-bench"
+path = "benches/benchmarks.rs"
+harness = false
 
 [dependencies]
 aoc-util.workspace = true
-
 itertools.workspace = true
 eyre.workspace = true
+miette = "7.6.0"
 
 petgraph.workspace = true
 
 [dev-dependencies]
 divan.workspace = true
-
-[[bench]]
-name = "aoc2015day09-bench"
-path = "benches/benchmarks.rs"
-harness = false

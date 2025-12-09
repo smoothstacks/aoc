@@ -19,6 +19,7 @@ strum = { version = "*", features = ["derive"] }
 glam = "0.30.9"
 euclid = "0.22.11"
 divan = "0.1.21"
+petgraph = "0.8.3"
 
 [profile.release]
 debug = true
