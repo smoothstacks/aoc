@@ -282,16 +282,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "aoc2016day01"
-version = "0.1.0"
-dependencies = [
- "aoc-util",
- "divan",
- "eyre",
- "itertools",
-]
-
-[[package]]
 name = "aoc2023day01"
 version = "0.1.0"
 dependencies = [
@@ -584,6 +574,17 @@ name = "aoc2025day09"
 version = "0.1.0"
 dependencies = [
  "aoc-util",
+ "divan",
+ "eyre",
+ "itertools",
+]
+
+[[package]]
+name = "aoc2025day10"
+version = "0.1.0"
+dependencies = [
+ "aoc-util",
+ "derive_more",
  "divan",
  "eyre",
  "itertools",
